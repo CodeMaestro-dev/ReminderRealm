@@ -35,7 +35,7 @@ input {
 
 button {
     color: #FDFDFD;
-    background-color: #AC485A;
+    background-color: #4898ca;
     border: 0;
     padding: 15px;
     border-radius: 8px;
@@ -45,7 +45,7 @@ button {
 }
 
 button:hover {
-    background-color: #432000;
+    background-color: #3274a9;
     cursor: pointer;
 }
 
