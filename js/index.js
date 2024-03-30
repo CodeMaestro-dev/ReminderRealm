@@ -1,65 +1,62 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"
+const inputFieldEl = document.getElementById("input-field");
+const addButtonEl = document.getElementById("add-button");
+const shoppingListEl = document.getElementById("shopping-list");
 
-const appSettings = {
-    databaseURL: "https://playground-e0cab-default-rtdb.europe-west1.firebasedatabase.app/"
+// Retrieve items from local storage or initialize an empty array
+let rememberRealmItems =
+  JSON.parse(localStorage.getItem("ReminderRealm")) || [];
+
+// Function to update local storage with current items
+function updateLocalStorage(items) {
+  localStorage.setItem("ReminderRealm", JSON.stringify(items));
 }
 
-const app = initializeApp(appSettings)
-const database = getDatabase(app)
-const shoppingListInDB = ref(database, "shoppingList")
+// Function to add an item to the shopping list
+function addItemToList(item) {
+  rememberRealmItems.push(item);
+  updateLocalStorage(rememberRealmItems);
+  appendItemToShoppingListEl(item);
+}
 
-const inputFieldEl = document.getElementById("input-field")
-const addButtonEl = document.getElementById("add-button")
-const shoppingListEl = document.getElementById("shopping-list")
+// Function to remove an item from the shopping list
+function removeItemFromList(item) {
+  const index = rememberRealmItems.indexOf(item);
+  if (index !== -1) {
+    rememberRealmItems.splice(index, 1);
+    updateLocalStorage(rememberRealmItems);
+    clearShoppingListEl();
+    rememberRealmItems.forEach(appendItemToShoppingListEl);
+  }
+}
 
-addButtonEl.addEventListener("click", function() {
-    let inputValue = inputFieldEl.value
-    
-    push(shoppingListInDB, inputValue)
-    
-    clearInputFieldEl()
-})
+// Function to append and remove an item to the shopping list DOM
+function appendItemToShoppingListEl(item) {
+  let newEl = document.createElement("li");
+  newEl.textContent = item;
+  newEl.addEventListener("click", function () {
+    confirm("Are you sure you want to delete this item?");
+    newEl.remove();
+    removeItemFromList(item);
+  });
+  shoppingListEl.appendChild(newEl);
+}
 
-onValue(shoppingListInDB, function(snapshot) {
-    if (snapshot.exists()) {
-        let itemsArray = Object.entries(snapshot.val())
-    
-        clearShoppingListEl()
-        
-        for (let i = 0; i < itemsArray.length; i++) {
-            let currentItem = itemsArray[i]
-            let currentItemID = currentItem[0]
-            let currentItemValue = currentItem[1]
-            
-            appendItemToShoppingListEl(currentItem)
-        }    
-    } else {
-        shoppingListEl.innerHTML = "No items here... yet"
-    }
-})
+// Initialize the shopping list
+// if (rememberRealmItems.length === 0) {
+//   shoppingListEl.innerHTML = "No items here... yet";
+// } else {
+//   rememberRealmItems.forEach(appendItemToShoppingListEl);
+// }
+
+// Event listener for adding items
+addButtonEl.addEventListener("click", function () {
+  let inputValue = inputFieldEl.value.trim();
+  if (inputValue !== "") {
+    addItemToList(inputValue);
+    inputFieldEl.value = ""; // Clear input field after adding item
+  } 
+});
 
 function clearShoppingListEl() {
-    shoppingListEl.innerHTML = ""
-}
-
-function clearInputFieldEl() {
-    inputFieldEl.value = ""
-}
-
-function appendItemToShoppingListEl(item) {
-    let itemID = item[0]
-    let itemValue = item[1]
-    
-    let newEl = document.createElement("li")
-    
-    newEl.textContent = itemValue
-    
-    newEl.addEventListener("click", function() {
-        let exactLocationOfItemInDB = ref(database, `shoppingList/${itemID}`)
-        
-        remove(exactLocationOfItemInDB)
-    })
-    
-    shoppingListEl.append(newEl)
+  shoppingListEl.innerHTML = "";
 }
