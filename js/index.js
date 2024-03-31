@@ -34,9 +34,12 @@ function appendItemToShoppingListEl(item) {
   let newEl = document.createElement("li");
   newEl.textContent = item;
   newEl.addEventListener("click", function () {
-    confirm("Are you sure you want to delete this item?");
-    newEl.remove();
-    removeItemFromList(item);
+    if(confirm("Are you sure you want to delete this item?")) {
+      newEl.remove();
+      removeItemFromList(item);
+    } else {
+      return;
+    }
   });
   shoppingListEl.appendChild(newEl);
 }
