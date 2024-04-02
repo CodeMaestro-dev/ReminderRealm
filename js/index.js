@@ -1,5 +1,6 @@
 const inputFieldEl = document.getElementById("input-field");
 const addButtonEl = document.getElementById("add-button");
+const enableNotificationsEl = document.getElementById("enable-notifications");
 const shoppingListEl = document.getElementById("shopping-list");
 
 // Retrieve items from local storage or initialize an empty array
@@ -24,7 +25,7 @@ function removeItemFromList(item) {
   if (index !== -1) {
     rememberRealmItems.splice(index, 1);
     updateLocalStorage(rememberRealmItems);
-    clearShoppingListEl();
+    // clearShoppingListEl();
     rememberRealmItems.forEach(appendItemToShoppingListEl);
   }
 }
@@ -34,7 +35,7 @@ function appendItemToShoppingListEl(item) {
   let newEl = document.createElement("li");
   newEl.textContent = item;
   newEl.addEventListener("click", function () {
-    if(confirm("Are you sure you want to delete this item?")) {
+    if (confirm("Are you sure you want to delete this item?")) {
       newEl.remove();
       removeItemFromList(item);
     } else {
@@ -57,9 +58,39 @@ addButtonEl.addEventListener("click", function () {
   if (inputValue !== "") {
     addItemToList(inputValue);
     inputFieldEl.value = ""; // Clear input field after adding item
-  } 
+  }
 });
 
-function clearShoppingListEl() {
-  shoppingListEl.innerHTML = "";
+enableNotificationsEl.addEventListener("click", askNotificationsPermission);
+
+
+// if (rememberRealmItems.length === 0) {
+//   shoppingListEl.innerHTML = "No items here... yet";
+// } else {
+//   clearShoppingListEl();
+//   rememberRealmItems.forEach(appendItemToShoppingListEl);
+// }
+
+if (Notification.permission === 'denied' || Notification.permission === 'default') {
+  enableNotificationsEl.style.display = 'block';
+} else {
+  enableNotificationsEl.style.display = 'none';
+
+}
+
+function askNotificationsPermission() {
+  Notification.requestPermission().then((result) => {
+    if (result === 'granted') {
+      enableNotificationsEl.style.display = 'none';
+    }
+    console.log(result);
+    showNotifications();
+  });
+}
+
+function showNotifications() {
+  const notification = new Notification('RememberRealm', {
+    body: `You have somethings to remember about ${rememberRealmItems[0]} `,
+    icon: './assets/ReminderRealm.png'
+  })
 }
